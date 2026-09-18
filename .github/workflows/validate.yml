@@ -13,14 +13,12 @@ jobs:
   rust:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.98.1
-          components: rustfmt, clippy
+      - uses: actions/checkout@v7.0.1
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
       - name: Format
-        run: cargo fmt --all --check
+        run: cargo +1.98.1 fmt --all --check
       - name: Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo +1.98.1 clippy --all-targets --all-features -- -D warnings
       - name: Test
-        run: cargo test --all-features
+        run: cargo +1.98.1 test --all-features
