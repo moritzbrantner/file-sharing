@@ -7,17 +7,31 @@ Local-first file and folder sharing with two deliberately small product modes:
 
 The ordinary filesystem remains authoritative. `file-sharing` moves and synchronizes bytes; it does not interpret documents, index their contents, expose JSON data as an API, or own application-specific metadata.
 
-## Architecture direction
+## Architecture
 
-The reusable core should cover filesystem manifests, stable relative paths, content hashes, transfer progress, resumability, integrity verification, peer/device identity, and explicit acceptance.
+The reusable core owns portable filesystem manifests, stable relative paths, content hashes, verification, progress, and resume semantics.
 
-One-off transfer and persistent sync are separate adapters over that core:
+One-off transfer and persistent synchronization are separate adapters over that core:
 
 - one-off transfer owns temporary send/receive sessions;
 - persistent sync delegates replication to Syncthing rather than reimplementing its synchronization protocol.
 
-## First slice
+## Current slice: deterministic manifests
 
-The first implementation slice builds deterministic manifests for a file or folder. A manifest is the boundary used by later transfer code to describe exactly what is being shared and verify received bytes.
+The first implemented primitive describes exactly what is being shared before networking begins:
 
-The initial CLI will expose that primitive before networking is added, so the transfer protocol can be built on a tested, deterministic representation rather than inventing file identity inside the transport layer.
+- files are identified by byte length and SHA-256;
+- folder entries use stable relative paths and deterministic ordering;
+- empty directories are retained;
+- timestamps are deliberately excluded from content identity;
+- symbolic links are rejected until their cross-platform and security semantics are explicit.
+
+Generate a manifest with:
+
+```sh
+cargo run -- manifest ./path/to/file-or-folder
+```
+
+The resulting JSON is intended to become the acceptance and verification boundary for one-off transfers and a reusable observation surface for sync adapters.
+
+See [ROADMAP.md](./ROADMAP.md) for the next slices.
