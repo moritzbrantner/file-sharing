@@ -216,8 +216,7 @@ mod tests {
 
     use super::{ReceivePlanEntry, build_receive_plan, validate_manifest_for_receive};
 
-    const EMPTY_SHA256: &str =
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    const EMPTY_SHA256: &str = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
     fn directory_manifest(entries: Vec<ManifestEntry>) -> ShareManifest {
         ShareManifest {
@@ -290,8 +289,12 @@ mod tests {
     #[test]
     fn duplicate_paths_are_rejected() {
         let manifest = directory_manifest(vec![
-            ManifestEntry::Directory { path: "docs".into() },
-            ManifestEntry::Directory { path: "docs".into() },
+            ManifestEntry::Directory {
+                path: "docs".into(),
+            },
+            ManifestEntry::Directory {
+                path: "docs".into(),
+            },
         ]);
 
         let error =
