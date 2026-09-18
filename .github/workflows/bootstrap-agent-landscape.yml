@@ -18,6 +18,7 @@ jobs:
       - name: Check out file-sharing
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          ref: chore/agent-landscape-foundation
           fetch-depth: 0
 
       - name: Set up Bun
@@ -30,7 +31,7 @@ jobs:
         with:
           repository: moritzbrantner/coding-tooling
           ref: 9a1aaac5bd4aac7c0d78857f51dbcde41ed20cb1
-          path: .bootstrap/coding-tooling
+          path: .tooling/coding-tooling
           persist-credentials: false
 
       - name: Check out coding-agent-conventions
@@ -38,7 +39,7 @@ jobs:
         with:
           repository: moritzbrantner/coding-agent-conventions
           ref: 8c0d721f1643f5858fdc41753b6e323e1da6800b
-          path: .bootstrap/coding-agent-conventions
+          path: .tooling/coding-agent-conventions
           persist-credentials: false
 
       - name: Check out platform-upgrader
@@ -46,30 +47,30 @@ jobs:
         with:
           repository: moritzbrantner/platform-upgrader
           ref: 9ec0dfb04c4ff7ed850323489560f38755f938f3
-          path: .bootstrap/platform-upgrader
+          path: .tooling/platform-upgrader
           persist-credentials: false
 
       - name: Install pinned tooling dependencies
         shell: bash
         run: |
           set -euo pipefail
-          (cd .bootstrap/coding-tooling && bun install --frozen-lockfile)
-          (cd .bootstrap/platform-upgrader && bun install --frozen-lockfile && bun run build)
+          (cd .tooling/coding-tooling && bun install --frozen-lockfile)
+          (cd .tooling/platform-upgrader && bun install --frozen-lockfile && bun run build)
 
       - name: Apply coding-tooling foundation
         shell: bash
         run: |
           set -euo pipefail
-          bun .bootstrap/coding-tooling/src/router.ts bootstrap apply \
+          bun .tooling/coding-tooling/src/router.ts bootstrap apply \
             --root "$GITHUB_WORKSPACE" \
-            --conventions-root "$GITHUB_WORKSPACE/.bootstrap/coding-agent-conventions" \
+            --conventions-root "$GITHUB_WORKSPACE/ .tooling/coding-agent-conventions" \
             --json
 
       - name: Apply environment-v1
         shell: bash
         run: |
           set -euo pipefail
-          node .bootstrap/platform-upgrader/dist/cli.js apply environment-v1 "$GITHUB_WORKSPACE"
+          node .tooling/platform-upgrader/dist/cli.js apply environment-v1 "$GITHUB_WORKSPACE"
 
       - name: Generate the application lockfile
         shell: bash
@@ -82,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bun .bootstrap/coding-tooling/src/router.ts foundation audit \
+          bun .tooling/coding-tooling/src/router.ts foundation audit \
             --root "$GITHUB_WORKSPACE" \
             --json
 
@@ -90,7 +91,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .bootstrap
+          rm -rf .tooling
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
