@@ -63,10 +63,7 @@ fn run() -> Result<()> {
                     ReceivePlanEntry::Directory {
                         manifest_path,
                         destination_path,
-                    } => println!(
-                        "directory\t{manifest_path}\t{}",
-                        destination_path.display()
-                    ),
+                    } => println!("directory\t{manifest_path}\t{}", destination_path.display()),
                     ReceivePlanEntry::File {
                         manifest_path,
                         destination_path,
