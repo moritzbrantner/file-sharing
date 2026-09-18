@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
           bun .tooling/coding-tooling/src/router.ts bootstrap apply \
             --root "$GITHUB_WORKSPACE" \
-            --conventions-root "$GITHUB_WORKSPACE/ .tooling/coding-agent-conventions" \
+            --conventions-root "$GITHUB_WORKSPACE/.tooling/coding-agent-conventions" \
             --json
 
       - name: Apply environment-v1
