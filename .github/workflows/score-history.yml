@@ -1,0 +1,25 @@
+name: Coding Tooling Score History
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coding-tooling-score-history-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    permissions:
+      contents: write
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-score-history.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    with:
+      tier: fast
+      strict: true
+      install_mode: auto
+      history_branch: score-history

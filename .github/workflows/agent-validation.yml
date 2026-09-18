@@ -1,0 +1,55 @@
+name: Agent Validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: Fast semantic gate
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    with:
+      operation: run
+      tier: fast
+      strict: true
+      install_mode: auto
+      report_path: .artifacts/coding-tooling/fast.json
+
+  foundation:
+    name: Foundation contract
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    with:
+      operation: foundation
+      strict: true
+      install_mode: none
+      report_path: .artifacts/coding-tooling/foundation.json
+
+  findings:
+    name: Repository findings
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    with:
+      operation: findings
+      strict: false
+      install_mode: none
+      report_path: .artifacts/coding-tooling/findings.json
+
+  public-contract:
+    name: Public contract evidence
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    with:
+      operation: public-contract
+      strict: false
+      install_mode: auto
+      report_path: .artifacts/coding-tooling/public-contract.json
