@@ -160,13 +160,10 @@ fn sha256_file(path: &Path) -> Result<String> {
 }
 
 fn portable_name(path: &Path) -> Result<String> {
-    let name = path
+    let resolved = fs::canonicalize(path)
+        .with_context(|| format!("failed to resolve share root {}", path.display()))?;
+    let name = resolved
         .file_name()
-        .or_else(|| {
-            path.components()
-                .next_back()
-                .map(|component| component.as_os_str())
-        })
         .context("share path has no portable name")?;
 
     name.to_str()
@@ -295,6 +292,27 @@ mod tests {
             manifest_json_pretty(&first).expect("first JSON should serialize"),
             manifest_json_pretty(&second).expect("second JSON should serialize")
         );
+    }
+
+    #[test]
+    fn dot_path_uses_the_actual_directory_name() {
+        let temp = TestDir::new();
+        fs::write(temp.path().join("hello.txt"), b"hello").expect("fixture should be written");
+
+        let current = std::env::current_dir().expect("current directory should be available");
+        std::env::set_current_dir(temp.path()).expect("test should enter fixture directory");
+        let manifest = build_manifest(".").expect("dot path should build");
+        std::env::set_current_dir(current).expect("test should restore current directory");
+
+        assert_eq!(
+            manifest.root_name,
+            temp.path()
+                .file_name()
+                .and_then(|name| name.to_str())
+                .expect("fixture directory should have a UTF-8 name")
+        );
+        assert_ne!(manifest.root_name, ".");
+        assert_ne!(manifest.root_name, "..");
     }
 
     #[cfg(unix)]
