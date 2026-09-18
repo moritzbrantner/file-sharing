@@ -1,0 +1,9 @@
+schema_version = 1
+id = "moritzbrantner/file-sharing"
+kind = "app"
+status = "experimental"
+summary = "Local-first one-off file and folder transfer with Syncthing-backed persistent folder sharing."
+depends_on = []
+consumed_by = []
+supersedes = []
+replaced_by = []
