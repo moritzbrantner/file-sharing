@@ -52,21 +52,24 @@ pub fn build_manifest(path: impl AsRef<Path>) -> Result<ShareManifest> {
         .with_context(|| format!("failed to inspect {}", path.display()))?;
 
     if metadata.file_type().is_symlink() {
-        bail!("symbolic-link roots are not supported yet: {}", path.display());
+        bail!(
+            "symbolic-link roots are not supported yet: {}",
+            path.display()
+        );
     }
 
     let root_name = portable_name(path)?;
     let (root_kind, mut entries) = if metadata.is_file() {
-        (
-            RootKind::File,
-            vec![file_entry(path, root_name.clone())?],
-        )
+        (RootKind::File, vec![file_entry(path, root_name.clone())?])
     } else if metadata.is_dir() {
         let mut entries = Vec::new();
         collect_directory(path, path, &mut entries)?;
         (RootKind::Directory, entries)
     } else {
-        bail!("only regular files and directories can be shared: {}", path.display());
+        bail!(
+            "only regular files and directories can be shared: {}",
+            path.display()
+        );
     };
 
     entries.sort_by(|left, right| left.path().cmp(right.path()));
@@ -83,7 +86,11 @@ pub fn manifest_json_pretty(manifest: &ShareManifest) -> Result<String> {
     serde_json::to_string_pretty(manifest).context("failed to serialize share manifest")
 }
 
-fn collect_directory(base: &Path, directory: &Path, entries: &mut Vec<ManifestEntry>) -> Result<()> {
+fn collect_directory(
+    base: &Path,
+    directory: &Path,
+    entries: &mut Vec<ManifestEntry>,
+) -> Result<()> {
     let mut children = fs::read_dir(directory)
         .with_context(|| format!("failed to read directory {}", directory.display()))?
         .collect::<std::io::Result<Vec<_>>>()
@@ -155,7 +162,11 @@ fn sha256_file(path: &Path) -> Result<String> {
 fn portable_name(path: &Path) -> Result<String> {
     let name = path
         .file_name()
-        .or_else(|| path.components().next_back().map(|component| component.as_os_str()))
+        .or_else(|| {
+            path.components()
+                .next_back()
+                .map(|component| component.as_os_str())
+        })
         .context("share path has no portable name")?;
 
     name.to_str()
@@ -242,8 +253,7 @@ mod tests {
             vec![ManifestEntry::File {
                 path: "hello.txt".into(),
                 size_bytes: 3,
-                sha256: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
-                    .into(),
+                sha256: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad".into(),
             }]
         );
     }
@@ -298,6 +308,10 @@ mod tests {
         symlink(&target, temp.path().join("link.txt")).expect("symlink should be created");
 
         let error = build_manifest(temp.path()).expect_err("symlink should be rejected");
-        assert!(error.to_string().contains("symbolic links are not supported"));
+        assert!(
+            error
+                .to_string()
+                .contains("symbolic links are not supported")
+        );
     }
 }
