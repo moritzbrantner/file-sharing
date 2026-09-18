@@ -22,7 +22,9 @@ fn run() -> Result<()> {
 
     match command.to_string_lossy().as_ref() {
         "manifest" => {
-            let path = args.next().context("manifest requires a file or folder path")?;
+            let path = args
+                .next()
+                .context("manifest requires a file or folder path")?;
             if args.next().is_some() {
                 bail!("manifest accepts exactly one file or folder path");
             }
