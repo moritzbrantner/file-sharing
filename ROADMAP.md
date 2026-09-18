@@ -8,7 +8,7 @@ The roadmap stays deliberately small. Product behavior should emerge from the tw
 - [x] Use SHA-256 for exact file integrity and omit timestamps from content identity.
 - [x] Preserve empty directories and stable relative paths.
 - [x] Reject symbolic links until their cross-platform and security semantics are explicit.
-- [ ] Add receiver-side manifest validation and safe destination-path construction.
+- [x] Add receiver-side manifest validation and safe destination-path construction.
 - [ ] Add resumable chunk descriptions without changing whole-file identity.
 - [ ] Add explicit transfer progress and cancellation contracts.
 
