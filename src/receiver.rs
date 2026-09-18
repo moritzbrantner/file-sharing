@@ -178,7 +178,10 @@ fn validate_component(component: &str, label: &str) -> Result<()> {
         bail!("{label} is not a safe portable path component: {component:?}");
     }
 
-    if component.contains(['/', '\\', '\0', ':']) {
+    if component
+        .chars()
+        .any(|character| matches!(character, '/' | '\\' | '\0' | ':'))
+    {
         bail!("{label} contains a forbidden path character: {component:?}");
     }
 
