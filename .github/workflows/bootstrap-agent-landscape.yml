@@ -1,0 +1,107 @@
+name: Bootstrap agent landscape
+
+on:
+  push:
+    branches:
+      - chore/agent-landscape-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out file-sharing
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.0
+
+      - name: Check out coding-tooling
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: moritzbrantner/coding-tooling
+          ref: 9a1aaac5bd4aac7c0d78857f51dbcde41ed20cb1
+          path: .bootstrap/coding-tooling
+          persist-credentials: false
+
+      - name: Check out coding-agent-conventions
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: moritzbrantner/coding-agent-conventions
+          ref: 8c0d721f1643f5858fdc41753b6e323e1da6800b
+          path: .bootstrap/coding-agent-conventions
+          persist-credentials: false
+
+      - name: Check out platform-upgrader
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: moritzbrantner/platform-upgrader
+          ref: 9ec0dfb04c4ff7ed850323489560f38755f938f3
+          path: .bootstrap/platform-upgrader
+          persist-credentials: false
+
+      - name: Install pinned tooling dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd .bootstrap/coding-tooling && bun install --frozen-lockfile)
+          (cd .bootstrap/platform-upgrader && bun install --frozen-lockfile && bun run build)
+
+      - name: Apply coding-tooling foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun .bootstrap/coding-tooling/src/router.ts bootstrap apply \
+            --root "$GITHUB_WORKSPACE" \
+            --conventions-root "$GITHUB_WORKSPACE/.bootstrap/coding-agent-conventions" \
+            --json
+
+      - name: Apply environment-v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .bootstrap/platform-upgrader/dist/cli.js apply environment-v1 "$GITHUB_WORKSPACE"
+
+      - name: Generate the application lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.98.1 --profile minimal
+          cargo +1.98.1 generate-lockfile
+
+      - name: Audit the installed foundation
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun .bootstrap/coding-tooling/src/router.ts foundation audit \
+            --root "$GITHUB_WORKSPACE" \
+            --json
+
+      - name: Commit deterministic foundation state
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .bootstrap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            .coding-tooling.json \
+            conventions.json \
+            conventions.lock.json \
+            .conventions \
+            renovate.json \
+            .repository-environment.toml \
+            scripts/codex-environment.sh \
+            Cargo.lock
+          if git diff --cached --quiet; then
+            echo "Foundation already converged"
+            exit 0
+          fi
+          git commit -m "Install coding-agent repository foundation"
+          git push origin HEAD:chore/agent-landscape-foundation
