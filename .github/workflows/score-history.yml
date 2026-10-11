@@ -9,15 +9,12 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: coding-tooling-score-history-${{ github.repository }}
-  cancel-in-progress: false
-
 jobs:
   publish:
     permissions:
+      actions: read
       contents: write
-    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-score-history.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-score-history.yml@a11ca7f3feaca0936803308cf4b150b4150cb99c
     with:
       tier: fast
       strict: true
