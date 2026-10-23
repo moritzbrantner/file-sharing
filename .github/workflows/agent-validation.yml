@@ -17,7 +17,7 @@ concurrency:
 jobs:
   fast:
     name: Fast semantic gate
-    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@40ddfa48b3e68fcde2f055cd5e604f32d944e999
     with:
       operation: run
       tier: fast
@@ -27,7 +27,7 @@ jobs:
 
   foundation:
     name: Foundation contract
-    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@40ddfa48b3e68fcde2f055cd5e604f32d944e999
     with:
       operation: foundation
       strict: true
@@ -37,7 +37,7 @@ jobs:
   findings:
     name: Repository findings
     if: ${{ github.event_name != 'pull_request' }}
-    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@40ddfa48b3e68fcde2f055cd5e604f32d944e999
     with:
       operation: findings
       strict: false
@@ -47,7 +47,7 @@ jobs:
   public-contract:
     name: Public contract evidence
     if: ${{ github.event_name != 'pull_request' }}
-    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@ea8f0fd047bbc4de40810ad0ae869eae20c56f1c
+    uses: moritzbrantner/reusable-workflows/.github/workflows/coding-tooling-validation.yml@40ddfa48b3e68fcde2f055cd5e604f32d944e999
     with:
       operation: public-contract
       strict: false
